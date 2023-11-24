@@ -1,5 +1,4 @@
-import {
-  Agent,
+import type {
   AgentContext,
   AgentDependencies,
   DidResolutionResult,
