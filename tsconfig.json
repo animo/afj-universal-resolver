@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "baseUrl": "./src/",
+    "outDir": "build",
+    "target": "es2016",
+    "lib": ["ES2021"],
+    "module": "commonjs",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "declaration": true,
+    "sourceMap": true
+  },
+  "exclude": ["tests", "example"]
+}
