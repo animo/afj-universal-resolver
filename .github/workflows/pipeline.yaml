@@ -44,7 +44,7 @@ jobs:
       - name: "Setup Universal Resolver"
         run: |
           docker-compose -f compose/docker-compose.yml pull
-          docker-compose -f compose/docker-compose.yml up
+          docker-compose -f compose/docker-compose.yml up -d
           sleep 10
 
       - name: Test
