@@ -4,6 +4,7 @@
   "description": "AFJ Universal DID Resolver integration",
   "author": "Animo Solutions",
   "main": "src/index.ts",
+  "license": "APACHE-2.0",
   "scripts": {
     "build": "tsc",
     "test": "node --require ts-node/register --test ./tests/*.test.ts",
