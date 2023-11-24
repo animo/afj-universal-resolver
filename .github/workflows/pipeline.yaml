@@ -41,6 +41,13 @@ jobs:
       - name: Check types
         run: pnpm check-types
 
+      - name: "Setup Universal Resolver"
+        run: |
+          git clone https://github.com/decentralized-identity/universal-resolver
+          cd universal-resolver/
+          docker-compose -f docker-compose.yml pull
+          docker-compose -f docker-compose.yml up
+
       - name: Test
         run: pnpm test
 

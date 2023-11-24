@@ -7,10 +7,15 @@ import { Agent, DidsModule } from "@aries-framework/core"
 import { AskarModule } from "@aries-framework/askar"
 import { ariesAskar } from "@hyperledger/aries-askar-nodejs"
 
-describe("Universal Resolver + AFJ", async () => {
+describe("Universal Resolver + AFJ", { timeout: 120000 }, async () => {
+  // const BASE_URL = "https://dev.uniresolver.io"
+  const BASE_URL = "http://localhost:8080"
+  const FETCH_IDENTIFIERS_URL = `${BASE_URL}/1.0/identifiers`
+  const FETCH_METHODS_URL = `${BASE_URL}/1.0/methods`
+
   it("should instantiate a universal resolver", async () => {
     const uni = new UniversalDidResolver({
-      fetchIdentifiersUrl: "https://dev.uniresolver.io/1.0/identifiers",
+      fetchIdentifiersUrl: FETCH_IDENTIFIERS_URL,
       supportedMethods: ["key"]
     })
     assert(uni instanceof UniversalDidResolver)
@@ -19,21 +24,20 @@ describe("Universal Resolver + AFJ", async () => {
   it("should instantiate a universal resolver with dynamic methods", async () => {
     const uni = await UniversalDidResolver.initializeWithDynamicMethods(
       agentDependencies,
-      "https://dev.uniresolver.io/1.0/methods",
-      "https://dev.uniresolver.io/1.0/identifiers"
+      FETCH_METHODS_URL,
+      FETCH_IDENTIFIERS_URL
     )
     assert(uni instanceof UniversalDidResolver)
   })
 
   it("should use the uniresolver via the agent", async () => {
-    const devUniResolverUrl = "https://dev.uniresolver.io/1.0"
     const didKey =
       "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i"
 
     const uni = await UniversalDidResolver.initializeWithDynamicMethods(
       agentDependencies,
-      `${devUniResolverUrl}/methods`,
-      `${devUniResolverUrl}/identifiers`
+      FETCH_METHODS_URL,
+      FETCH_IDENTIFIERS_URL
     )
 
     const agent = new Agent({
@@ -83,6 +87,38 @@ describe("Universal Resolver + AFJ", async () => {
       assertionMethod: [
         "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i#z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i"
       ]
+    })
+
+    it("should use the uniresolver via the agent", async () => {
+      const didKey = "did:key:foo"
+
+      const uni = await UniversalDidResolver.initializeWithDynamicMethods(
+        agentDependencies,
+        FETCH_METHODS_URL,
+        FETCH_IDENTIFIERS_URL
+      )
+
+      const agent = new Agent({
+        config: {
+          label: "my-agent",
+          walletConfig: { id: "some-id", key: "some-key" }
+        },
+        modules: {
+          askar: new AskarModule({ ariesAskar }),
+          dids: new DidsModule({ resolvers: [uni] })
+        },
+        dependencies: agentDependencies
+      })
+
+      await agent.initialize()
+
+      const { didDocumentMetadata } = await agent.dids.resolve(didKey)
+
+      deepStrictEqual(didDocumentMetadata, {
+        error: "methodNotSupported",
+        errorMessage: "Method not supported: key",
+        contentType: "application/did+ld+json"
+      })
     })
   })
 })
