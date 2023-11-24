@@ -77,10 +77,9 @@ jobs:
 
       - name: Publish
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          echo ${{ inputs.release-type }}
           git config --global user.email "development@animo.id"
           git config --global user.name "Animo Bot"
 

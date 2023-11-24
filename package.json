@@ -3,7 +3,11 @@
   "version": "0.0.1",
   "description": "AFJ Universal DID Resolver integration",
   "author": "Animo Solutions",
-  "main": "src/index.ts",
+  "main": "build/index",
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
   "license": "APACHE-2.0",
   "files": [
     "build"
