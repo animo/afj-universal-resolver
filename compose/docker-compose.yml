@@ -1,0 +1,11 @@
+version: "3.6"
+
+networks:
+  default:
+    name: universal-resolver
+
+services:
+  did-jwk-driver:
+    image: transmute/restricted-resolver:latest
+    ports:
+      - "8080:8080"

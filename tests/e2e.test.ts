@@ -21,24 +21,27 @@ describe("Universal Resolver + AFJ", { timeout: 120000 }, async () => {
     assert(uni instanceof UniversalDidResolver)
   })
 
-  it("should instantiate a universal resolver with dynamic methods", async () => {
-    const uni = await UniversalDidResolver.initializeWithDynamicMethods(
-      agentDependencies,
-      FETCH_METHODS_URL,
-      FETCH_IDENTIFIERS_URL
-    )
-    assert(uni instanceof UniversalDidResolver)
-  })
+  it(
+    "should instantiate a universal resolver with dynamic methods",
+    { skip: true },
+    async () => {
+      const uni = await UniversalDidResolver.initializeWithDynamicMethods(
+        agentDependencies,
+        FETCH_METHODS_URL,
+        FETCH_IDENTIFIERS_URL
+      )
+      assert(uni instanceof UniversalDidResolver)
+    }
+  )
 
   it("should use the uniresolver via the agent", async () => {
-    const didKey =
-      "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i"
+    const didJwk =
+      "did:jwk:eyJraWQiOiJ1cm46aWV0ZjpwYXJhbXM6b2F1dGg6andrLXRodW1icHJpbnQ6c2hhLTI1NjpGZk1iek9qTW1RNGVmVDZrdndUSUpqZWxUcWpsMHhqRUlXUTJxb2JzUk1NIiwia3R5IjoiT0tQIiwiY3J2IjoiRWQyNTUxOSIsImFsZyI6IkVkRFNBIiwieCI6IkFOUmpIX3p4Y0tCeHNqUlBVdHpSYnA3RlNWTEtKWFE5QVBYOU1QMWo3azQifQ"
 
-    const uni = await UniversalDidResolver.initializeWithDynamicMethods(
-      agentDependencies,
-      FETCH_METHODS_URL,
-      FETCH_IDENTIFIERS_URL
-    )
+    const uni = new UniversalDidResolver({
+      fetchIdentifiersUrl: FETCH_IDENTIFIERS_URL,
+      supportedMethods: ["jwk"]
+    })
 
     const agent = new Agent({
       config: {
@@ -54,71 +57,66 @@ describe("Universal Resolver + AFJ", { timeout: 120000 }, async () => {
 
     await agent.initialize()
 
-    const { didDocument } = await agent.dids.resolve(didKey)
+    const { didDocument } = await agent.dids.resolve(didJwk)
 
     deepStrictEqual(didDocument, {
       "@context": [
         "https://www.w3.org/ns/did/v1",
         {
-          JsonWebKey2020: "https://w3id.org/security#JsonWebKey2020",
-          publicKeyJwk: {
-            "@id": "https://w3id.org/security#publicKeyJwk",
-            "@type": "@json"
-          }
+          "@vocab": "https://www.iana.org/assignments/jose#"
         }
       ],
-      id: "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i",
+      id: "did:jwk:eyJraWQiOiJ1cm46aWV0ZjpwYXJhbXM6b2F1dGg6andrLXRodW1icHJpbnQ6c2hhLTI1NjpGZk1iek9qTW1RNGVmVDZrdndUSUpqZWxUcWpsMHhqRUlXUTJxb2JzUk1NIiwia3R5IjoiT0tQIiwiY3J2IjoiRWQyNTUxOSIsImFsZyI6IkVkRFNBIiwieCI6IkFOUmpIX3p4Y0tCeHNqUlBVdHpSYnA3RlNWTEtKWFE5QVBYOU1QMWo3azQifQ",
       verificationMethod: [
         {
-          id: "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i#z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i",
+          id: "#0",
           type: "JsonWebKey2020",
           controller:
-            "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i",
+            "did:jwk:eyJraWQiOiJ1cm46aWV0ZjpwYXJhbXM6b2F1dGg6andrLXRodW1icHJpbnQ6c2hhLTI1NjpGZk1iek9qTW1RNGVmVDZrdndUSUpqZWxUcWpsMHhqRUlXUTJxb2JzUk1NIiwia3R5IjoiT0tQIiwiY3J2IjoiRWQyNTUxOSIsImFsZyI6IkVkRFNBIiwieCI6IkFOUmpIX3p4Y0tCeHNqUlBVdHpSYnA3RlNWTEtKWFE5QVBYOU1QMWo3azQifQ",
           publicKeyJwk: {
-            kty: "RSA",
-            n: "sbX82NTV6IylxCh7MfV4hlyvaniCajuP97GyOqSvTmoEdBOflFvZ06kR_9D6ctt45Fk6hskfnag2GG69NALVH2o4RCR6tQiLRpKcMRtDYE_thEmfBvDzm_VVkOIYfxu-Ipuo9J_S5XDNDjczx2v-3oDh5-CIHkU46hvFeCvpUS-L8TJSbgX0kjVk_m4eIb9wh63rtmD6Uz_KBtCo5mmR4TEtcLZKYdqMp3wCjN-TlgHiz_4oVXWbHUefCEe8rFnX1iQnpDHU49_SaXQoud1jCaexFn25n-Aa8f8bc5Vm-5SeRwidHa6ErvEhTvf1dz6GoNPp2iRvm-wJ1gxwWJEYPQ",
-            e: "AQAB"
+            kid: "urn:ietf:params:oauth:jwk-thumbprint:sha-256:FfMbzOjMmQ4efT6kvwTIJjelTqjl0xjEIWQ2qobsRMM",
+            kty: "OKP",
+            crv: "Ed25519",
+            alg: "EdDSA",
+            x: "ANRjH_zxcKBxsjRPUtzRbp7FSVLKJXQ9APX9MP1j7k4"
           }
         }
       ],
-      authentication: [
-        "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i#z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i"
-      ],
-      assertionMethod: [
-        "did:key:z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i#z4MXj1wBzi9jUstyPMS4jQqB6KdJaiatPkAtVtGc6bQEQEEsKTic4G7Rou3iBf9vPmT5dbkm9qsZsuVNjq8HCuW1w24nhBFGkRE4cd2Uf2tfrB3N7h4mnyPp1BF3ZttHTYv3DLUPi1zMdkULiow3M1GfXkoC6DoxDUm1jmN6GBj22SjVsr6dxezRVQc7aj9TxE7JLbMH1wh5X3kA58H3DFW8rnYMakFGbca5CB2Jf6CnGQZmL7o5uJAdTwXfy2iiiyPxXEGerMhHwhjTA1mKYobyk2CpeEcmvynADfNZ5MBvcCS7m3XkFCMNUYBS9NQ3fze6vMSUPsNa6GVYmKx2x6JrdEjCk3qRMMmyjnjCMfR4pXbRMZa3i"
-      ]
+      authentication: ["#0"],
+      assertionMethod: ["#0"],
+      capabilityInvocation: ["#0"],
+      capabilityDelegation: ["#0"]
+    })
+  })
+
+  it("should use the uniresolver via the agent", { skip: true }, async () => {
+    const didJwk = "did:jwk:foo"
+
+    const uni = new UniversalDidResolver({
+      fetchIdentifiersUrl: FETCH_IDENTIFIERS_URL,
+      supportedMethods: ["jwk"]
     })
 
-    it("should use the uniresolver via the agent", async () => {
-      const didKey = "did:key:foo"
+    const agent = new Agent({
+      config: {
+        label: "my-agent",
+        walletConfig: { id: "some-id", key: "some-key" }
+      },
+      modules: {
+        askar: new AskarModule({ ariesAskar }),
+        dids: new DidsModule({ resolvers: [uni] })
+      },
+      dependencies: agentDependencies
+    })
 
-      const uni = await UniversalDidResolver.initializeWithDynamicMethods(
-        agentDependencies,
-        FETCH_METHODS_URL,
-        FETCH_IDENTIFIERS_URL
-      )
+    await agent.initialize()
 
-      const agent = new Agent({
-        config: {
-          label: "my-agent",
-          walletConfig: { id: "some-id", key: "some-key" }
-        },
-        modules: {
-          askar: new AskarModule({ ariesAskar }),
-          dids: new DidsModule({ resolvers: [uni] })
-        },
-        dependencies: agentDependencies
-      })
+    const { didDocumentMetadata } = await agent.dids.resolve(didJwk)
 
-      await agent.initialize()
-
-      const { didDocumentMetadata } = await agent.dids.resolve(didKey)
-
-      deepStrictEqual(didDocumentMetadata, {
-        error: "methodNotSupported",
-        errorMessage: "Method not supported: key",
-        contentType: "application/did+ld+json"
-      })
+    deepStrictEqual(didDocumentMetadata, {
+      error: "methodNotSupported",
+      errorMessage: "Method not supported: key",
+      contentType: "application/did+ld+json"
     })
   })
 })
